@@ -22,7 +22,7 @@ Here is the list of required providers:
 ## Modules
 
 No modules.
-  
+
 ## Resources
 
 | Name | Type |
@@ -30,7 +30,7 @@ No modules.
 | [proxmox_virtual_environment_firewall_options.pve_vm_fw_opts](https://registry.terraform.io/providers/bpg/proxmox/latest/docs/resources/virtual_environment_firewall_options) | resource |
 | [proxmox_virtual_environment_firewall_rules.pve_vm_fw_rules](https://registry.terraform.io/providers/bpg/proxmox/latest/docs/resources/virtual_environment_firewall_rules) | resource |
 | [proxmox_virtual_environment_vm.pve_vm](https://registry.terraform.io/providers/bpg/proxmox/latest/docs/resources/virtual_environment_vm) | resource |
-  
+
 ## Inputs
 
 Here are the input variables of the module:
@@ -64,5 +64,4 @@ Here are the input variables of the module:
 | <a name="input_vm_fw_opts"></a> [vm\_fw\_opts](#input\_vm\_fw\_opts) | Firewall settings for the VM. | <pre>object({<br/>    enabled       = bool<br/>    dhcp          = optional(bool)<br/>    input\_policy  = optional(string)<br/>    output\_policy = optional(string)<br/>    macfilter     = optional(bool)<br/>    ipfilter      = optional(bool)<br/>    ndp           = optional(bool)<br/>    radv          = optional(bool)<br/>  })</pre> | `null` | $\color{red}{no}$ |
 | <a name="input_vm_fw_rules"></a> [vm\_fw\_rules](#input\_vm\_fw\_rules) | Firewall rules for the VM. | <pre>map(object({<br/>    enabled   = optional(bool, true)<br/>    action    = string<br/>    direction = string<br/>    iface     = optional(string)<br/>    proto     = optional(string)<br/>    srcip     = optional(string)<br/>    srcport   = optional(string)<br/>    destip    = optional(string)<br/>    destport  = optional(string)<br/>    comment   = optional(string)<br/>  }))</pre> | `null` | $\color{red}{no}$ |
 | <a name="input_vm_fw_group"></a> [vm\_fw\_group](#input\_vm\_fw\_group) | Firewall Security Groups for the VM. | <pre>map(object({<br/>    enabled   = optional(bool, true)<br/>    iface     = optional(string)<br/>    comment   = optional(string)<br/>  }))</pre> | `null` | $\color{red}{no}$ |
-  
 <!-- END_TF_DOCS -->
