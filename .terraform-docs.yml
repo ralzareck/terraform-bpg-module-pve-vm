@@ -93,7 +93,7 @@ content: |-
             {{- end -}}
           {{- end -}}
           {{- if $.Config.Settings.Required -}}
-            {{ printf " " }}{{ ternary .Required "<span style='color:green'>**yes**</span>" "<span style='color:red'>**no**</span>" }} |
+            {{ printf " " }}{{ ternary .Required "$\color{green}{yes}$" "$\color{red}{no}$" }} |
           {{- end -}}
         {{- end }}
     {{ end }}
