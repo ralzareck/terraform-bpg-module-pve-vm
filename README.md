@@ -23,6 +23,14 @@ Here is the list of required providers:
 
 No modules.
   
+## Resources
+
+    | Name | Type |
+    |------|------|
+        | [proxmox_virtual_environment_firewall_options.pve_vm_fw_opts](https://registry.terraform.io/providers/bpg/proxmox/latest/docs/resources/virtual_environment_firewall_options) | resource |
+        | [proxmox_virtual_environment_firewall_rules.pve_vm_fw_rules](https://registry.terraform.io/providers/bpg/proxmox/latest/docs/resources/virtual_environment_firewall_rules) | resource |
+        | [proxmox_virtual_environment_vm.pve_vm](https://registry.terraform.io/providers/bpg/proxmox/latest/docs/resources/virtual_environment_vm) | resource |
+  
 ## Inputs
 
 Here are the input variables of the module:
