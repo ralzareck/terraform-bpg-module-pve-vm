@@ -1,0 +1,309 @@
+# =============================================================================
+# ===== General ===============================================================
+# =============================================================================
+
+variable "pve_node" {
+  type = string
+  description = "PVE Node name on which the VM will be created on."
+
+  validation {
+    condition     = can(regex("[A-Za-z0-9.-]{1,63}", var.pve_node))
+    error_message = "This var is constrained by the node name requirements set forth by ProxMox."
+  }
+}
+
+variable "vm_type" {
+  type        = string
+  description = "The creation type of the VM. Can be 'clone' or 'img'"
+  default     = "clone"
+
+  validation {
+    condition     = contains(["clone", "img"], var.vm_type)
+    error_message = "Valid values for var: vm_type are (clone, img)."
+  }
+}
+
+variable "src_clone" {
+  type = object({
+    datastore_id = string
+    node_name    = optional(string)
+    tpl_id       = number
+  })
+  description    = "The target VM to clone. Cannot be used with 'src_file'"
+  nullable       = true
+  default        = null
+}
+
+variable "src_file" {
+  type = object({
+    datastore_id        = string
+    file_name           = string
+  })
+  description = "The target ISO file to use as base for the VM. Cannot be used with 'src_clone'"
+  nullable              = true
+  default               = null
+}
+
+# =============================================================================
+# ===== VM ====================================================================
+# =============================================================================
+
+variable "vm_name" {
+  type        = string
+  description = "The name of the VM."
+}
+
+variable "vm_description" {
+  type        = string
+  description = "The description of the VM."
+  default     = null
+}
+
+variable "vm_id" {
+  type        = number
+  description = "The ID of the VM."
+  default     = null
+}
+
+variable "vm_pool" {
+  type        = string
+  description = "The Pool in which to place the VM."
+  nullable    = true
+  default     = null
+
+  validation {
+    condition     = can(regex("[A-Za-z0-9_-]{0,63}", var.vm_pool))
+    error_message = "value"
+  }
+}
+
+variable "vm_tags" {
+  type = list(string)
+  description = "A list of tags associated to the VM."
+  default     = []
+}
+
+variable "vm_start" {
+  type = object({
+    on_deploy  = bool
+    on_boot    = bool
+    order      = optional(number, 0)
+    up_delay   = optional(number, 0)
+    down_delay = optional(number, 0)
+  })
+  description  = "The start settings for the VM."
+  default      = {
+    on_deploy  = true
+    on_boot    = false
+  }
+}
+
+variable "vm_bios" {
+  type        = string
+  description = "The BIOS Implementation of the VM."
+  default     = "ovmf"
+
+  validation {
+    condition     = contains(["ovmf", "seabios"], var.vm_bios)
+    error_message = "Valid values for var: vm_bios are (ovmf, seabios)."
+  }
+}
+
+variable "vm_machine" {
+  type        = string
+  description = "The machine type of the VM."
+  default     = "q35"
+
+  validation {
+    condition     = contains(["pc", "q35"], var.vm_machine)
+    error_message = "Valid values for var: vm_machine are (pc, q35)."
+  }
+}
+
+variable "vm_scsi_hardware" {
+  type        = string
+  description = "The SCSI hardware type of the VM."
+  default     = "virtio-scsi-single"
+
+  validation {
+    condition     = contains(["lsi", "lsi53c810", "virtio-scsi-pci", "virtio-scsi-single", "megasas", "pvscsi"], var.vm_scsi_hardware)
+    error_message = "Valid values for var: vm_scsi_hardware are (lsi, lsi53c810, virtio-scsi-pci, virtio-scsi-single, megasas, pvscsi)."
+  }
+}
+
+variable "vm_os" {
+  type = string
+  description = "The Operating System configuration."
+  default = "l26"
+
+  validation {
+    condition     = contains(["l24", "l26", "other", "solaris", "w2k", "w2k3", "w2k8", "win7", "win8", "win10", "win11", "wvista", "wxp"], var.vm_os)
+    error_message = "Valid values for var: vm_os are (l24, l26, other, solaris, w2k, w2k3, w2k8, win7, win8, win10, win11, wvista, wxp)."
+  }
+}
+
+variable "vm_cpu" {
+  type = object({
+    type      = optional(string, "host")
+    cores     = optional(number, 2)
+    units     = optional(number)
+  })
+  description = "VM CPU Configuration."
+  default     = {}
+}
+
+variable "vm_mem" {
+  type = object({
+    dedicated = optional(number, 2048)
+    floating  = optional(number)
+    shared    = optional(number)
+  })
+  description = "VM Memory Configuration."
+  default     = {}
+}
+
+variable "vm_display" {
+  type = object({
+    type      = optional(string, "std")
+    memory    = optional(number, 16)
+  })
+  description = "VM Display Configuration."
+  default     = {}
+}
+
+variable "vm_pcie" {
+  type = map(object({
+    name        = string
+    pcie        = optional(bool, true)
+    primary_gpu = optional(bool, false)
+  }))
+  description = "VM host PCI device mapping."
+  nullable = true
+  default = null
+}
+
+variable "vm_efi_disk" {
+  type = object({
+    datastore_id      = string
+    file_format       = optional(string, "raw")
+    type              = optional(string, "4m")
+    pre_enrolled_keys = optional(bool, false)
+  })
+  description = "The UEFI disk device."
+}
+
+variable "vm_img_disk" {
+  type = object({
+    interface    = string
+    datastore_id = string
+    size         = number
+    file_format  = optional(string, "qcow2")
+    iothread     = optional(bool, true)
+  })
+  description = "The CDROM interface for the VM."
+  nullable = true
+  default = null
+}
+
+variable "vm_disk" {
+  type = map(object({
+    datastore_id = string
+    size         = number
+    file_format  = optional(string, "raw")
+    iothread     = optional(bool, true)
+  }))
+  description    = "VM Disks configuration."
+  default        = {}
+}
+
+variable "vm_net_ifaces" {
+  type = map(object({
+    bridge     = string
+    enabled    = optional(bool, true)
+    firewall   = optional(bool, true)
+    mac_addr   = optional(string)
+    model      = optional(string, "virtio")
+    mtu        = optional(number, 1500)
+    rate_limit = optional(string)
+    vlan_id    = optional(number)
+    ipv4_addr  = string
+    ipv4_gw    = string
+  }))
+  description  = "VM network interfaces configuration."
+  default      = {}
+}
+
+variable "vm_init" {
+  type = object({
+    datastore_id = optional(string)
+    interface    = optional(string, "ide0")
+    user         = optional(object({
+      name         = optional(string)
+      password     = optional(string)
+      keys         = optional(list(string))
+    }))
+    dns          = optional(object({
+      domain       = optional(string)
+      servers      = optional(list(string))
+    }))
+  })
+  description    = "Initial configuration for the VM"
+  default        = {}
+}
+
+variable "vm_user_data" {
+  type        = string
+  description = "cloud-init configuration for the VM's users"
+  nullable    = true
+  default     = null
+}
+
+# =============================================================================
+# ===== Host Firewall =========================================================
+# =============================================================================
+
+variable "vm_fw_opts" {
+  type = object({
+    enabled       = bool
+    dhcp          = optional(bool)
+    input_policy  = optional(string)
+    output_policy = optional(string)
+    macfilter     = optional(bool)
+    ipfilter      = optional(bool)
+    ndp           = optional(bool)
+    radv          = optional(bool)
+  })
+  description     = "Firewall settings for the VM."
+  nullable        = true
+  default         = null
+}
+
+variable "vm_fw_rules" {
+  type = map(object({
+    enabled   = optional(bool, true)
+    action    = string
+    direction = string
+    iface     = optional(string)
+    proto     = optional(string)
+    srcip     = optional(string)
+    srcport   = optional(string)
+    destip    = optional(string)
+    destport  = optional(string)
+    comment   = optional(string)
+  }))
+  description = "Firewall rules for the VM."
+  nullable    = true
+  default     = null
+}
+
+
+variable "vm_fw_group" {
+  type = map(object({
+    enabled   = optional(bool, true)
+    iface     = optional(string)
+    comment   = optional(string)
+  }))
+  description = "Firewall Security Groups for the VM."
+  nullable    = true
+  default     = null
+}
