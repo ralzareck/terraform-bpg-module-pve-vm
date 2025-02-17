@@ -37,11 +37,11 @@ content: |-
   {{- if .Config.Sections.ModuleCalls -}}
     {{- if not .Module.ModuleCalls -}}
       {{- if not .Config.Settings.HideEmpty -}}
-        {{- indent 0 "#" }} Modules
+  {{- indent 0 "#" }} Modules
 
   No modules.
       {{- end }}
-    {{ else }}
+    {{- else -}}
       {{- indent 0 "#" }} Modules
 
   | Name | Source | Version |
@@ -49,17 +49,20 @@ content: |-
       {{- range .Module.ModuleCalls }}
   | {{ anchorNameMarkdown "module" .Name }} | {{ .Source }} | {{ .Version | default "n/a" }} |
       {{- end }}
-    {{ end }}
+    {{- end }}
   {{ end -}}
   {{- if or .Config.Sections.Resources .Config.Sections.DataSources -}}
+    {{- if .Config.Sections.ModuleCalls -}}
+      {{- printf "\n" -}}
+    {{- end -}}
     {{- if not .Module.Resources -}}
       {{- if not .Config.Settings.HideEmpty -}}
-        {{- indent 0 "#" }} Resources
+  {{- indent 0 "#" }} Resources
 
         No resources.
-      {{ end }}
-    {{ else }}
-      {{- indent 0 "#" }} Resources
+      {{- end }}
+    {{- else -}}
+  {{- indent 0 "#" }} Resources
 
   | Name | Type |
   |------|------|
@@ -71,17 +74,20 @@ content: |-
   | {{ $fullspec }} | {{ .GetMode }} |
         {{- end }}
       {{- end }}
-    {{ end }}
+    {{- end }}
   {{ end -}}
   {{- if .Config.Sections.Inputs -}}
+    {{- if or .Config.Sections.Resources .Config.Sections.DataSources -}}
+      {{- printf "\n" -}}
+    {{- end -}}
     {{- if not .Module.Inputs -}}
       {{- if not .Config.Settings.HideEmpty -}}
-        {{- indent 0 "#" }} Inputs
+  {{- indent 0 "#" }} Inputs
 
   No inputs.
       {{- end }}
-    {{ else }}
-        {{- indent 0 "#" }} Inputs
+    {{- else -}}
+  {{- indent 0 "#" }} Inputs
 
   Here are the input variables of the module:
 
@@ -119,22 +125,25 @@ content: |-
             {{ printf " " }}{{ ternary .Required "$\\color{green}{yes}$" "$\\color{red}{no}$" }} |
           {{- end -}}
         {{- end }}
-    {{ end }}
+    {{- end }}
   {{ end -}}
   {{- if .Config.Sections.Outputs -}}
+    {{- if .Config.Sections.Inputs -}}
+      {{- printf "\n" -}}
+    {{- end -}}
     {{- if not .Module.Outputs -}}
       {{- if not .Config.Settings.HideEmpty -}}
-        {{- indent 0 "#" }} Outputs
+  {{- indent 0 "#" }} Outputs
 
         No outputs.
       {{- end }}
-    {{ else }}
-      {{- indent 0 "#" }} Outputs
+    {{- else -}}
+  {{- indent 0 "#" }} Outputs
 
   | Name | Description |
   |------|-------------|
       {{- range .Module.Outputs }}
   | {{ anchorNameMarkdown "output" .Name }} | {{ tostring .Description | sanitizeMarkdownTbl }} |
       {{- end }}
-    {{ end }}
+    {{- end }}
   {{ end -}}
