@@ -3,6 +3,7 @@ formatter: "markdown table"
 sections:
   show:
     - modules
+    - resources
     - inputs
     # - outputs
 
@@ -47,6 +48,28 @@ content: |-
   |------|--------|---------|
       {{- range .Module.ModuleCalls }}
   | {{ anchorNameMarkdown "module" .Name }} | {{ .Source }} | {{ .Version | default "n/a" }} |
+      {{- end }}
+    {{ end }}
+  {{ end -}}
+  {{- if or .Config.Sections.Resources .Config.Sections.DataSources -}}
+    {{- if not .Module.Resources -}}
+      {{- if not .Config.Settings.HideEmpty -}}
+        {{- indent 0 "#" }} Resources
+
+        No resources.
+      {{ end }}
+    {{ else }}
+      {{- indent 0 "#" }} Resources
+
+      | Name | Type |
+      |------|------|
+      {{- range .Module.Resources }}
+        {{- $isResource := and $.Config.Sections.Resources ( eq "resource" (printf "%s" .GetMode)) }}
+        {{- $isDataResource := and $.Config.Sections.DataSources ( eq "data source" (printf "%s" .GetMode)) }}
+        {{- if or $isResource $isDataResource }}
+          {{- $fullspec := ternary .URL (printf "[%s](%s)" .Spec .URL) .Spec }}
+          | {{ $fullspec }} | {{ .GetMode }} |
+        {{- end }}
       {{- end }}
     {{ end }}
   {{ end -}}
