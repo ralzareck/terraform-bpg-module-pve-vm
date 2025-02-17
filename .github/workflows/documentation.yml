@@ -1,9 +1,14 @@
 ---
 name: Generate terraform docs
 on:
-  - push
+  pull_request:
+    types:
+      - opened
+    branches:
+      - "main"
+      - "stable-"
 jobs:
-  docs:
+  update_docs:
     permissions:
       contents: write
     runs-on: ubuntu-latest
