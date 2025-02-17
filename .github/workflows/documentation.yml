@@ -1,6 +1,10 @@
 ---
 name: Generate terraform docs
 on:
+  push:
+    branches:
+      - "main"
+      - "stable-"
   pull_request:
     types:
       - opened
