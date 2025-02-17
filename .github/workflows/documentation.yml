@@ -1,9 +1,11 @@
 ---
 name: Generate terraform docs
 on:
-  - pull_request
+  - push
 jobs:
   docs:
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
