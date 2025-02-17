@@ -14,9 +14,9 @@ It can be based on an already deployed VM template, or an existing disk image.
 
 Here is the list of required providers:
 
-| Name                                                                    | Version   |
-| ----------------------------------------------------------------------- | --------- |
-| [bgp/proxmox](https://search.opentofu.org/provider/bpg/proxmox/v0.66.0) | >= 0.66.0 |
+| Name                                                               | Version   |
+| ------------------------------------------------------------------ | --------- |
+| [bgp/proxmox](https://registry.terraform.io/providers/bpg/proxmox) | >= 0.66.0 |
 
 <!-- BEGIN_TF_DOCS -->
 ## Modules
