@@ -38,4 +38,3 @@ terraform.rc
 
 # Project ignore
 outputs.tf
-**/.config/tfdocs-templates/*
