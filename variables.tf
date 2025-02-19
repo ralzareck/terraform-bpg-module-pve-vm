@@ -14,8 +14,7 @@ variable "pve_node" {
 
 variable "vm_type" {
   type        = string
-  description = "The creation type of the VM. Can be 'clone' or 'img'"
-  default     = "clone"
+  description = "The source type used for the creation of the container. Can either be 'clone' or 'template'."
 
   validation {
     condition     = contains(["clone", "img"], var.vm_type)
@@ -53,15 +52,15 @@ variable "vm_name" {
   description = "The name of the VM."
 }
 
-variable "vm_description" {
-  type        = string
-  description = "The description of the VM."
-  default     = null
-}
-
 variable "vm_id" {
   type        = number
   description = "The ID of the VM."
+  default     = null
+}
+
+variable "vm_description" {
+  type        = string
+  description = "The description of the VM."
   default     = null
 }
 
@@ -72,8 +71,8 @@ variable "vm_pool" {
   default     = null
 
   validation {
-    condition     = can(regex("[A-Za-z0-9_-]{0,63}", var.vm_pool))
-    error_message = "value"
+    condition     = can(regex("[A-Za-z0-9_-]{0,63}", var.vm_pool)) || var.vm_pool == null
+    error_message = "This variable is constrained by the pool name requirements set forth by ProxmoxVE."
   }
 }
 
@@ -95,6 +94,9 @@ variable "vm_start" {
   default      = {
     on_deploy  = true
     on_boot    = false
+    order      = 0
+    up_delay   = 0
+    down_delay = 0
   }
 }
 
@@ -133,7 +135,7 @@ variable "vm_scsi_hardware" {
 
 variable "vm_os" {
   type = string
-  description = "The Operating System configuration."
+  description = "The Operating System configuration of the VM."
   default = "l26"
 
   validation {
@@ -148,7 +150,7 @@ variable "vm_cpu" {
     cores     = optional(number, 2)
     units     = optional(number)
   })
-  description = "VM CPU Configuration."
+  description = "The CPU Configuration of the VM."
   default     = {}
 }
 
@@ -158,7 +160,7 @@ variable "vm_mem" {
     floating  = optional(number)
     shared    = optional(number)
   })
-  description = "VM Memory Configuration."
+  description = "The Memory Configuration of the VM."
   default     = {}
 }
 
@@ -167,8 +169,13 @@ variable "vm_display" {
     type      = optional(string, "std")
     memory    = optional(number, 16)
   })
-  description = "VM Display Configuration."
+  description = "The Display Configuration of the VM."
   default     = {}
+
+  validation {
+    condition     = contains(["none", "cirrus", "qxl", "qxl2", "qxl3", "qxl4", "serial0", "serial1", "serial2", "serial3", "std", "virtio", "virtio-gl", "vmware"], var.vm_display.type)
+    error_message = "Valid values for var: vm_display.type are (none, cirrus, qxl, qxl2, qxl3, qxl4, serial0, serial1, serial2, serial3, std, virtio, virtio-gl, vmware)."
+  }
 }
 
 variable "vm_pcie" {
@@ -214,6 +221,11 @@ variable "vm_disk" {
   }))
   description    = "VM Disks configuration."
   default        = {}
+
+  validation {
+    condition     = alltrue([for k,v in var.vm_disk : can(regex("(?:scsi|sata|virtio)\\d+", k))])
+    error_message = "The IDs (keys) of the hard disk must respect the following convention: scsi[id], sata[id], virtio[id]."
+  }
 }
 
 variable "vm_net_ifaces" {
@@ -231,6 +243,11 @@ variable "vm_net_ifaces" {
   }))
   description  = "VM network interfaces configuration."
   default      = {}
+
+  validation {
+    condition     = alltrue([for k,v in var.vm_net_ifaces : can(regex("(?:scsi|sata|ide)\\d+", k))])
+    error_message = "The IDs (keys) of the network device must respect the following convention: net[id]."
+  }
 }
 
 variable "vm_init" {
@@ -249,6 +266,11 @@ variable "vm_init" {
   })
   description    = "Initial configuration for the VM"
   default        = {}
+
+  validation {
+    condition     = can(regex("net\\d+", var.vm_init.interface))
+    error_message = "The IDs (keys) of the CloudInit drive must respect the following convention: scsi[id], sata[id], ide[id]."
+  }
 }
 
 variable "vm_user_data" {
