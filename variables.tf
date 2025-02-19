@@ -245,7 +245,7 @@ variable "vm_net_ifaces" {
   default      = {}
 
   validation {
-    condition     = alltrue([for k,v in var.vm_net_ifaces : can(regex("(?:scsi|sata|ide)\\d+", k))])
+    condition     = alltrue([for k,v in var.vm_net_ifaces : can(regex("net\\d+", k))])
     error_message = "The IDs (keys) of the network device must respect the following convention: net[id]."
   }
 }
@@ -268,7 +268,7 @@ variable "vm_init" {
   default        = {}
 
   validation {
-    condition     = can(regex("net\\d+", var.vm_init.interface))
+    condition     = can(regex("(?:scsi|sata|ide)\\d+", var.vm_init.interface))
     error_message = "The IDs (keys) of the CloudInit drive must respect the following convention: scsi[id], sata[id], ide[id]."
   }
 }
