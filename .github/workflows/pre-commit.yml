@@ -1,0 +1,87 @@
+---
+name: Pre-Commit and Generate terraform docs
+on:
+  pull_request:
+    branches:
+      - "main"
+      - "master"
+      - "stable-"
+
+env:
+  TERRAFORM_DOCS_VERSION: 0.19.0
+  TFLINT_VERSION: 0.53.0
+  HCLEDIT_VERSION: 0.2.3
+
+jobs:
+  collect-inputs:
+    name: Get Terraform directories
+    runs-on: ubuntu-latest
+    outputs:
+      directories: ${{ steps.tf-dirs.outputs.directories }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Get root directories
+        id: tf-dirs
+        uses: clowdhaus/terraform-composite-actions/directories@v1.9.0
+
+      - name: List terraform directories
+        run: echo "${{ steps.tf-dirs.outputs.directories }}"
+
+  update-docs:
+    needs: collect-inputs
+    name: Update terraform docs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{github.event.pull_request.head.repo.full_name}}
+
+      - name: Render terraform docs inside the README.md and push changes back to PR branch
+        uses: terraform-docs/gh-actions@v1.3.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          working-dir: .
+          config-file: '.terraform-docs.yml'
+          output-file: 'README.md'
+          output-method: 'inject'
+          git-push: 'true'
+          git-commit-message: '[Docs] Generate README.md'
+
+  pre-commit:
+    needs: update-docs
+    name: Pre-Commit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete huge unnecessary tools folder
+        run: |
+          rm -rf /opt/hostedtoolcache/CodeQL
+          rm -rf /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk
+          rm -rf /opt/hostedtoolcache/Ruby
+          rm -rf /opt/hostedtoolcache/go
+
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{github.event.pull_request.head.repo.full_name}}
+
+      - name: Terraform min/max versions
+        id: tf-versions
+        uses: clowdhaus/terraform-min-max@v1.3.1
+
+      - name: Pre-commit Terraform ${{ steps.tf-versions.outputs.maxVersion }}
+        uses: clowdhaus/terraform-composite-actions/pre-commit@v1.11.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          terraform-version: ${{ steps.tf-versions.outputs.maxVersion }}
+          tflint-version: v${{ env.TFLINT_VERSION }}
+          terraform-docs-version: v${{ env.TERRAFORM_DOCS_VERSION }}
+          install-hcledit: true
+          hcledit-version: ${{ env.HCLEDIT_VERSION }}
+          args: "--all-files"
