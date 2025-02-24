@@ -3,7 +3,7 @@
 # =============================================================================
 
 variable "pve_node" {
-  type = string
+  type        = string
   description = "PVE Node name on which the VM will be created on."
 
   validation {
@@ -28,19 +28,19 @@ variable "src_clone" {
     node_name    = optional(string)
     tpl_id       = number
   })
-  description    = "The target VM to clone. Cannot be used with 'src_file'"
-  nullable       = true
-  default        = null
+  description = "The target VM to clone. Cannot be used with 'src_file'"
+  nullable    = true
+  default     = null
 }
 
 variable "src_file" {
   type = object({
-    datastore_id        = string
-    file_name           = string
+    datastore_id = string
+    file_name    = string
   })
   description = "The target ISO file to use as base for the VM. Cannot be used with 'src_clone'"
-  nullable              = true
-  default               = null
+  nullable    = true
+  default     = null
 }
 
 # =============================================================================
@@ -77,7 +77,7 @@ variable "vm_pool" {
 }
 
 variable "vm_tags" {
-  type = list(string)
+  type        = list(string)
   description = "A list of tags associated to the VM."
   default     = []
 }
@@ -90,8 +90,8 @@ variable "vm_start" {
     up_delay   = optional(number, 0)
     down_delay = optional(number, 0)
   })
-  description  = "The start settings for the VM."
-  default      = {
+  description = "The start settings for the VM."
+  default = {
     on_deploy  = true
     on_boot    = false
     order      = 0
@@ -134,9 +134,9 @@ variable "vm_scsi_hardware" {
 }
 
 variable "vm_os" {
-  type = string
+  type        = string
   description = "The Operating System configuration of the VM."
-  default = "l26"
+  default     = "l26"
 
   validation {
     condition     = contains(["l24", "l26", "other", "solaris", "w2k", "w2k3", "w2k8", "win7", "win8", "win10", "win11", "wvista", "wxp"], var.vm_os)
@@ -146,9 +146,9 @@ variable "vm_os" {
 
 variable "vm_cpu" {
   type = object({
-    type      = optional(string, "host")
-    cores     = optional(number, 2)
-    units     = optional(number)
+    type  = optional(string, "host")
+    cores = optional(number, 2)
+    units = optional(number)
   })
   description = "The CPU Configuration of the VM."
   default     = {}
@@ -166,8 +166,8 @@ variable "vm_mem" {
 
 variable "vm_display" {
   type = object({
-    type      = optional(string, "std")
-    memory    = optional(number, 16)
+    type   = optional(string, "std")
+    memory = optional(number, 16)
   })
   description = "The Display Configuration of the VM."
   default     = {}
@@ -185,8 +185,8 @@ variable "vm_pcie" {
     primary_gpu = optional(bool, false)
   }))
   description = "VM host PCI device mapping."
-  nullable = true
-  default = null
+  nullable    = true
+  default     = null
 }
 
 variable "vm_efi_disk" {
@@ -208,8 +208,8 @@ variable "vm_img_disk" {
     iothread     = optional(bool, true)
   })
   description = "The CDROM interface for the VM."
-  nullable = true
-  default = null
+  nullable    = true
+  default     = null
 }
 
 variable "vm_disk" {
@@ -219,11 +219,11 @@ variable "vm_disk" {
     file_format  = optional(string, "raw")
     iothread     = optional(bool, true)
   }))
-  description    = "VM Disks configuration."
-  default        = {}
+  description = "VM Disks configuration."
+  default     = {}
 
   validation {
-    condition     = alltrue([for k,v in var.vm_disk : can(regex("(?:scsi|sata|virtio)\\d+", k))])
+    condition     = alltrue([for k, v in var.vm_disk : can(regex("(?:scsi|sata|virtio)\\d+", k))])
     error_message = "The IDs (keys) of the hard disk must respect the following convention: scsi[id], sata[id], virtio[id]."
   }
 }
@@ -241,11 +241,11 @@ variable "vm_net_ifaces" {
     ipv4_addr  = string
     ipv4_gw    = string
   }))
-  description  = "VM network interfaces configuration."
-  default      = {}
+  description = "VM network interfaces configuration."
+  default     = {}
 
   validation {
-    condition     = alltrue([for k,v in var.vm_net_ifaces : can(regex("net\\d+", k))])
+    condition     = alltrue([for k, v in var.vm_net_ifaces : can(regex("net\\d+", k))])
     error_message = "The IDs (keys) of the network device must respect the following convention: net[id]."
   }
 }
@@ -254,18 +254,18 @@ variable "vm_init" {
   type = object({
     datastore_id = optional(string)
     interface    = optional(string, "ide0")
-    user         = optional(object({
-      name         = optional(string)
-      password     = optional(string)
-      keys         = optional(list(string))
+    user = optional(object({
+      name     = optional(string)
+      password = optional(string)
+      keys     = optional(list(string))
     }))
-    dns          = optional(object({
-      domain       = optional(string)
-      servers      = optional(list(string))
+    dns = optional(object({
+      domain  = optional(string)
+      servers = optional(list(string))
     }))
   })
-  description    = "Initial configuration for the VM"
-  default        = {}
+  description = "Initial configuration for the VM"
+  default     = {}
 
   validation {
     condition     = can(regex("(?:scsi|sata|ide)\\d+", var.vm_init.interface))
@@ -295,9 +295,9 @@ variable "vm_fw_opts" {
     ndp           = optional(bool)
     radv          = optional(bool)
   })
-  description     = "Firewall settings for the VM."
-  nullable        = true
-  default         = null
+  description = "Firewall settings for the VM."
+  nullable    = true
+  default     = null
 }
 
 variable "vm_fw_rules" {
@@ -321,9 +321,9 @@ variable "vm_fw_rules" {
 
 variable "vm_fw_group" {
   type = map(object({
-    enabled   = optional(bool, true)
-    iface     = optional(string)
-    comment   = optional(string)
+    enabled = optional(bool, true)
+    iface   = optional(string)
+    comment = optional(string)
   }))
   description = "Firewall Security Groups for the VM."
   nullable    = true

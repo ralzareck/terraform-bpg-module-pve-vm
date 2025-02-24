@@ -1,34 +1,21 @@
 # =============================================================================
-# ===== Provider ==============================================================
-# =============================================================================
-
-terraform {
-  required_providers {
-    proxmox = {
-      version = ">= 0.66"
-      source = "bpg/proxmox"
-    }
-  }
-}
-
-# =============================================================================
 # = VM Creation ===============================================================
 # =============================================================================
 
 resource "proxmox_virtual_environment_vm" "pve_vm" {
   # Proxmox
-  node_name    = var.pve_node
+  node_name = var.pve_node
 
   # VM Information
-  name         = var.vm_name
-  description  = var.vm_description
-  tags         = var.vm_tags
-  vm_id        = var.vm_id
-  pool_id      = var.vm_pool
+  name        = var.vm_name
+  description = var.vm_description
+  tags        = var.vm_tags
+  vm_id       = var.vm_id
+  pool_id     = var.vm_pool
 
   # Boot settings
-  started      = var.vm_start.on_deploy
-  on_boot      = var.vm_start.on_boot
+  started = var.vm_start.on_deploy
+  on_boot = var.vm_start.on_boot
 
   startup {
     order      = var.vm_start.order
@@ -51,14 +38,14 @@ resource "proxmox_virtual_environment_vm" "pve_vm" {
     type = var.vm_os
   }
 
-  bios             = (var.vm_type == "img") ? var.vm_bios : null
-  machine          = (var.vm_type == "img") ? var.vm_machine : null
-  scsi_hardware    = (var.vm_type == "img") ? var.vm_scsi_hardware : null
+  bios          = (var.vm_type == "img") ? var.vm_bios : null
+  machine       = (var.vm_type == "img") ? var.vm_machine : null
+  scsi_hardware = (var.vm_type == "img") ? var.vm_scsi_hardware : null
 
   cpu {
-    type         = var.vm_cpu.type
-    cores        = var.vm_cpu.cores
-    units        = var.vm_cpu.units
+    type  = var.vm_cpu.type
+    cores = var.vm_cpu.cores
+    units = var.vm_cpu.units
   }
 
   memory {
@@ -100,8 +87,8 @@ resource "proxmox_virtual_environment_vm" "pve_vm" {
       file_format  = var.vm_image_disk.file_format
       file_id      = "${var.src_file.datastore_id}:iso/${var.src_file.file_name}"
       # file_id      = (var.src_file.url == null) ? "${var.src_file.datastore_id}:iso/${var.src_file.file_name}" : proxmox_virtual_environment_download_file.vm_image[0].id
-      size         = var.vm_image_disk.size
-      iothread     = var.vm_image_disk.iothread
+      size     = var.vm_image_disk.size
+      iothread = var.vm_image_disk.iothread
     }
   }
 
@@ -180,8 +167,8 @@ resource "proxmox_virtual_environment_vm" "pve_vm" {
 resource "proxmox_virtual_environment_firewall_options" "pve_vm_fw_opts" {
   count = (var.vm_fw_opts != null) ? 1 : 0
 
-  node_name     = proxmox_virtual_environment_vm.pve_vm.node_name
-  vm_id         = proxmox_virtual_environment_vm.pve_vm.vm_id
+  node_name = proxmox_virtual_environment_vm.pve_vm.node_name
+  vm_id     = proxmox_virtual_environment_vm.pve_vm.vm_id
 
   enabled       = var.vm_fw_opts.enabled
   dhcp          = var.vm_fw_opts.dhcp
@@ -194,8 +181,8 @@ resource "proxmox_virtual_environment_firewall_options" "pve_vm_fw_opts" {
 resource "proxmox_virtual_environment_firewall_rules" "pve_vm_fw_rules" {
   count = (var.vm_fw_rules != null || var.vm_fw_group != null) ? 1 : 0
 
-  node_name    = proxmox_virtual_environment_vm.pve_vm.node_name
-  vm_id        = proxmox_virtual_environment_vm.pve_vm.vm_id
+  node_name = proxmox_virtual_environment_vm.pve_vm.node_name
+  vm_id     = proxmox_virtual_environment_vm.pve_vm.vm_id
 
   dynamic "rule" {
     for_each = var.vm_fw_rules != null ? var.vm_fw_rules : {}
