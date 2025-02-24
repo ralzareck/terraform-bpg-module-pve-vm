@@ -199,19 +199,6 @@ variable "vm_efi_disk" {
   description = "The UEFI disk device."
 }
 
-variable "vm_img_disk" {
-  type = object({
-    interface    = string
-    datastore_id = string
-    size         = number
-    file_format  = optional(string, "qcow2")
-    iothread     = optional(bool, true)
-  })
-  description = "The CDROM interface for the VM."
-  nullable    = true
-  default     = null
-}
-
 variable "vm_disk" {
   type = map(object({
     datastore_id = string
