@@ -14,11 +14,11 @@ variable "pve_node" {
 
 variable "vm_type" {
   type        = string
-  description = "The source type used for the creation of the container. Can either be 'clone' or 'template'."
+  description = "The source type used for the creation of the container. Can either be 'clone' or 'image'."
 
   validation {
-    condition     = contains(["clone", "img"], var.vm_type)
-    error_message = "Valid values for var: vm_type are (clone, img)."
+    condition     = contains(["clone", "image"], var.vm_type)
+    error_message = "Valid values for var: vm_type are (clone, image)."
   }
 }
 

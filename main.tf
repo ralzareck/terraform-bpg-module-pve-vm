@@ -38,9 +38,9 @@ resource "proxmox_virtual_environment_vm" "pve_vm" {
     type = var.vm_os
   }
 
-  bios          = (var.vm_type == "img") ? var.vm_bios : null
-  machine       = (var.vm_type == "img") ? var.vm_machine : null
-  scsi_hardware = (var.vm_type == "img") ? var.vm_scsi_hardware : null
+  bios          = (var.vm_type == "image") ? var.vm_bios : null
+  machine       = (var.vm_type == "image") ? var.vm_machine : null
+  scsi_hardware = (var.vm_type == "image") ? var.vm_scsi_hardware : null
 
   cpu {
     type  = var.vm_cpu.type
@@ -80,7 +80,7 @@ resource "proxmox_virtual_environment_vm" "pve_vm" {
   }
 
   dynamic "disk" {
-    for_each = (var.vm_type == "img") ? ["enabled"] : []
+    for_each = (var.vm_type == "image") ? ["enabled"] : []
     content {
       interface    = var.vm_image_disk.interface
       datastore_id = var.vm_image_disk.datastore_id
@@ -155,7 +155,7 @@ resource "proxmox_virtual_environment_vm" "pve_vm" {
   lifecycle {
     precondition {
       condition     = ((var.vm_init.user != null && var.vm_user_data == null) || (var.vm_init.user == null && var.vm_user_data != null) || (var.vm_init.user == null && var.vm_user_data == null))
-      error_message = "Variables 'vm_init.user' and 'vm_user_data' are incompatible, only one should be set!"
+      error_message = "Variables 'vm_init.user' and 'vm_user_data' are incompatible, only one should be set."
     }
   }
 }
