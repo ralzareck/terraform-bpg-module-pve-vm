@@ -197,6 +197,8 @@ variable "vm_efi_disk" {
     pre_enrolled_keys = optional(bool, false)
   })
   description = "The UEFI disk device."
+  nullable    = true
+  default     = null
 }
 
 variable "vm_disk" {
