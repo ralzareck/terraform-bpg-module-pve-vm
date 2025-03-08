@@ -19,7 +19,7 @@ module "pve_vm" {
 
   vm_bios = "ovmf"
   vm_efi_disk = {
-    datastore_id     = "data"
+    datastore_id = "data"
   }
 
   vm_net_ifaces = {
