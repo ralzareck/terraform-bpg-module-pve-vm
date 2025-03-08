@@ -164,6 +164,11 @@ resource "proxmox_virtual_environment_vm" "pve_vm" {
     }
 
     precondition {
+      condition     = var.vm_bios == "ovmf" ? var.vm_efi_disk != null : true
+      error_message = "Variable 'srcvm_efi_disk_file' is required when using the VM bios type is 'ovmf'"
+    }
+
+    precondition {
       condition     = ((var.vm_init.user != null && var.vm_user_data == null) || (var.vm_init.user == null && var.vm_user_data != null) || (var.vm_init.user == null && var.vm_user_data == null))
       error_message = "Variables 'vm_init.user' and 'vm_user_data' are incompatible, only one should be set."
     }
