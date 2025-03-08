@@ -154,6 +154,21 @@ resource "proxmox_virtual_environment_vm" "pve_vm" {
 
   lifecycle {
     precondition {
+      condition     =  var.vm_type == "clone" ? var.src_clone != null : true
+      error_message =  "Variable 'src_clone' is required when using the VM creation type is 'clone'"
+    }
+
+    precondition {
+      condition     =  var.vm_type == "image" ? var.src_file != null : true
+      error_message =  "Variable 'src_file' is required when using the VM creation type is 'image'"
+    }
+
+    precondition {
+      condition     = var.vm_bios == "ovmf" ? var.vm_efi_disk != null : true
+      error_message = "Variable 'srcvm_efi_disk_file' is required when using the VM bios type is 'ovmf'"
+    }
+
+    precondition {
       condition     = ((var.vm_init.user != null && var.vm_user_data == null) || (var.vm_init.user == null && var.vm_user_data != null) || (var.vm_init.user == null && var.vm_user_data == null))
       error_message = "Variables 'vm_init.user' and 'vm_user_data' are incompatible, only one should be set."
     }

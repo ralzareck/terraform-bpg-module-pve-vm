@@ -93,7 +93,7 @@ variable "vm_start" {
   description = "The start settings for the VM."
   default = {
     on_deploy  = true
-    on_boot    = false
+    on_boot    = true
     order      = 0
     up_delay   = 0
     down_delay = 0
@@ -102,8 +102,8 @@ variable "vm_start" {
 
 variable "vm_bios" {
   type        = string
-  description = "The BIOS Implementation of the VM."
-  default     = "ovmf"
+  description = "The BIOS Implementation of the VM. Can either be 'seabios' or 'ovmf'."
+  default     = "seabios"
 
   validation {
     condition     = contains(["ovmf", "seabios"], var.vm_bios)
@@ -197,6 +197,8 @@ variable "vm_efi_disk" {
     pre_enrolled_keys = optional(bool, false)
   })
   description = "The UEFI disk device."
+  nullable    = true
+  default     = null
 }
 
 variable "vm_disk" {
@@ -228,8 +230,7 @@ variable "vm_net_ifaces" {
     ipv4_addr  = string
     ipv4_gw    = string
   }))
-  description = "VM network interfaces configuration."
-  default     = {}
+  description = "VM network interfaces configuration. Terraform provider bpg/proxmox cannot work properly without network access."
 
   validation {
     condition     = alltrue([for k, v in var.vm_net_ifaces : can(regex("net\\d+", k))])
@@ -239,7 +240,7 @@ variable "vm_net_ifaces" {
 
 variable "vm_init" {
   type = object({
-    datastore_id = optional(string)
+    datastore_id = string
     interface    = optional(string, "ide0")
     user = optional(object({
       name     = optional(string)
@@ -251,8 +252,7 @@ variable "vm_init" {
       servers = optional(list(string))
     }))
   })
-  description = "Initial configuration for the VM"
-  default     = {}
+  description = "Initial configuration for the VM. Required for the creation of the Cloud-Init drive."
 
   validation {
     condition     = can(regex("(?:scsi|sata|ide)\\d+", var.vm_init.interface))
