@@ -102,8 +102,8 @@ variable "vm_start" {
 
 variable "vm_bios" {
   type        = string
-  description = "The BIOS Implementation of the VM."
-  default     = "ovmf"
+  description = "The BIOS Implementation of the VM. Can either be 'seabios' or 'ovmf'."
+  default     = "seabios"
 
   validation {
     condition     = contains(["ovmf", "seabios"], var.vm_bios)
