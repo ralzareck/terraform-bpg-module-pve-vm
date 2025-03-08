@@ -230,8 +230,7 @@ variable "vm_net_ifaces" {
     ipv4_addr  = string
     ipv4_gw    = string
   }))
-  description = "VM network interfaces configuration."
-  default     = {}
+  description = "VM network interfaces configuration. Terraform provider bpg/proxmox cannot work properly without network access."
 
   validation {
     condition     = alltrue([for k, v in var.vm_net_ifaces : can(regex("net\\d+", k))])
