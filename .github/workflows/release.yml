@@ -36,7 +36,7 @@ jobs:
       # Please look up the latest version from
       # https://github.com/marketplace/actions/release-drafter
       - name: Create Release Draft
-        uses: release-drafter/release-drafter@v6
+        uses: release-drafter/release-drafter@v6.1.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
