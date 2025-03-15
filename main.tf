@@ -159,13 +159,13 @@ resource "proxmox_virtual_environment_vm" "pve_vm" {
 
   lifecycle {
     precondition {
-      condition     =  var.vm_type == "clone" ? var.src_clone != null : true
-      error_message =  "Variable 'src_clone' is required when using the VM creation type is 'clone'"
+      condition     = var.vm_type == "clone" ? var.src_clone != null : true
+      error_message = "Variable 'src_clone' is required when using the VM creation type is 'clone'"
     }
 
     precondition {
-      condition     =  var.vm_type == "image" ? var.src_file != null : true
-      error_message =  "Variable 'src_file' is required when using the VM creation type is 'image'"
+      condition     = var.vm_type == "image" ? var.src_file != null : true
+      error_message = "Variable 'src_file' is required when using the VM creation type is 'image'"
     }
 
     precondition {
