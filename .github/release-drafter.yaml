@@ -3,7 +3,8 @@ tag-template: 'v$RESOLVED_VERSION'
 categories:
   - title: '🚀 Features'
     labels:
-      - 'feat'
+      - 'feature'
+      - 'enhancement'
   - title: '⚙️ Changes'
     labels:
       - 'refactor'
@@ -11,10 +12,11 @@ categories:
   - title: '🐛 Bug Fixes'
     labels:
       - 'fix'
+      - 'bugfix'
       - 'bug'
   - title: '📖 Documentation'
     labels:
-      - 'docs'
+      - 'documentation'
   - title: '🛠️ Maintenance'
     labels:
       - 'ci'
