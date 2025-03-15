@@ -207,13 +207,19 @@ variable "vm_disk" {
     size         = number
     file_format  = optional(string, "raw")
     iothread     = optional(bool, true)
+    main_disk    = optional(bool, false)
   }))
-  description = "VM Disks configuration."
+  description = "VM Disks configuration. Use the 'main_disk' value to tag a disk as main to host the VM image. Only usefull with creation type 'image'."
   default     = {}
 
   validation {
     condition     = alltrue([for k, v in var.vm_disk : can(regex("(?:scsi|sata|virtio)\\d+", k))])
     error_message = "The IDs (keys) of the hard disk must respect the following convention: scsi[id], sata[id], virtio[id]."
+  }
+
+  validation {
+    condition     = length([for k, v in var.vm_disk : k if v.main_disk]) <= 1
+    error_message = "Only one disk at maximum can be tagged as main to host the VM image."
   }
 }
 
