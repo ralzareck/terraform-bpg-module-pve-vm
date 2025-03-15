@@ -2,6 +2,10 @@
 # = VM Creation ===============================================================
 # =============================================================================
 
+locals {
+  src_file_disk = anytrue([for k, v in var.vm_disk : v.main_disk]) ? [for k, v in var.vm_disk : k if v.main_disk] : [for k, v in var.vm_disk : k if k == keys(var.vm_disk)[0]]
+}
+
 resource "proxmox_virtual_environment_vm" "pve_vm" {
   # Proxmox
   node_name = var.pve_node
@@ -79,21 +83,22 @@ resource "proxmox_virtual_environment_vm" "pve_vm" {
     }
   }
 
+  # If the creation type is 'image', the fist disk will be used as base for the VM img file.
   dynamic "disk" {
-    for_each = (var.vm_type == "image") ? ["enabled"] : []
+    for_each = (var.vm_type == "image") ? { for k, v in var.vm_disk : k => v if contains(local.src_file_disk, k) } : {}
     content {
-      interface    = var.vm_image_disk.interface
-      datastore_id = var.vm_image_disk.datastore_id
-      file_format  = var.vm_image_disk.file_format
+      interface    = disk.key
+      datastore_id = disk.value.datastore_id
+      file_format  = disk.value.file_format
       file_id      = "${var.src_file.datastore_id}:iso/${var.src_file.file_name}"
       # file_id      = (var.src_file.url == null) ? "${var.src_file.datastore_id}:iso/${var.src_file.file_name}" : proxmox_virtual_environment_download_file.vm_image[0].id
-      size     = var.vm_image_disk.size
-      iothread = var.vm_image_disk.iothread
+      size     = disk.value.size
+      iothread = disk.value.iothread
     }
   }
 
   dynamic "disk" {
-    for_each = (var.vm_type == "clone") ? var.vm_disk : {}
+    for_each = (var.vm_type == "clone") ? var.vm_disk : { for k, v in var.vm_disk : k => v if !contains(local.src_file_disk, k) }
     content {
       interface    = disk.key
       datastore_id = disk.value.datastore_id
