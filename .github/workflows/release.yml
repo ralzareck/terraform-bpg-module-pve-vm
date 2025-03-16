@@ -5,14 +5,11 @@ on:
   push:
     branches:
       - main
-
-  # pull_request event is required only for autolabeler
-  pull_request:
-    # Only following types are handled by the action, but one can default to all as well
-    types: [opened, reopened, synchronize]
-  # pull_request_target event is required for autolabeler to support PRs from forks
-  # pull_request_target:
-  #   types: [opened, reopened, synchronize]
+  pull_request_target:
+    types:
+      - opened
+      - reopened
+      - synchronize
 
 permissions:
   contents: read
@@ -36,7 +33,7 @@ jobs:
       # Please look up the latest version from
       # https://github.com/marketplace/actions/release-drafter
       - name: Create Release Draft
-        uses: release-drafter/release-drafter@v6
+        uses: release-drafter/release-drafter@v6.1.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
