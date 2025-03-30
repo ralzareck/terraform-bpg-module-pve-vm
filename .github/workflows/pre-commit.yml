@@ -158,14 +158,14 @@ jobs:
         id: lint
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          tflint_version: ${{ env.TFLINT_VERSION }}
-          tflint_config: .tflint.hcl
-          tflint_init: true
           reporter: github-pr-check
           fail_level: error
           filter_mode: nofilter
           level: error
-          flags: ""
+          flags: ''
+          tflint_version: ${{ env.TFLINT_VERSION }}
+          tflint_config: .tflint.hcl
+          tflint_init: true
 
   terraform-security:
     name: Run terraform security validation
@@ -201,11 +201,11 @@ jobs:
           fail_level: error
           filter_mode: nofilter
           level: error
-          flags: ""
-          trivy_flags: ""
+          flags: ''
+          trivy_version: ${{ env.TRIVY_VERSION }}
+          trivy_flags: ''
           trivy_command: config
-          trivy_target: .
-          trivy_version: ${{ env.trivy_version }}
+          trivy_target: '.'
 
   pre-commit:
     name: Pre-Commit
