@@ -149,7 +149,7 @@ jobs:
         if: ${{ env.TFLINT_REPO_CONFIG_PATH != '' }}
         with:
           source-repo: ${{ env.TFLINT_REPO }}
-          source-path: ${{ env.TFLINT_REPO_CONFIG_PATH }}
+          source-path: ${{ env.TFLINT_REPO_CONFIG_PATH }}/.tflint.hcl
           source-ref: ${{ env.TFLINT_REPO_REF }}
           destination-path: .tflint.hcl
 
