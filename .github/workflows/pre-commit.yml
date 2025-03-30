@@ -14,9 +14,9 @@ env:
   OPENTOFU_VERSION: '1.9.0'
   TERRAFORM_DOCS_VERSION: '0.19.0'
   TFLINT_VERSION: 'latest'
-  TFLINT_REPO_CONFIG_PATH: ''
+  TFLINT_REPO: 'ralzareck/tflint-config'
   TFLINT_REPO_REF: 'main'
-  TFLINT_REPO: 'nuvibit/github-tflint-config'
+  TFLINT_REPO_CONFIG_PATH: 'module'
   TRIVY_VERSION: 'latest'
   HCLEDIT_VERSION: '0.2.3'
 
@@ -159,12 +159,13 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           tflint_version: ${{ env.TFLINT_VERSION }}
+          tflint_config: .tflint.hcl
+          tflint_init: true
           reporter: github-pr-check
           fail_level: error
           filter_mode: nofilter
           level: error
           flags: ""
-          tflint_init: true
 
   terraform-security:
     name: Run terraform security validation
