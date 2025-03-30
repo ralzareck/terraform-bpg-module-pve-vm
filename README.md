@@ -39,7 +39,7 @@ Here are the input variables of the module:
 |------|-------------|------|---------|:--------:|
 | <a name="input_pve_node"></a> [pve\_node](#input\_pve\_node) | PVE Node name on which the VM will be created on. | `string` | `n/a` | $\color{green}{yes}$ |
 | <a name="input_vm_type"></a> [vm\_type](#input\_vm\_type) | The source type used for the creation of the container. Can either be 'clone' or 'image'. | `string` | `n/a` | $\color{green}{yes}$ |
-| <a name="input_src_clone"></a> [src\_clone](#input\_src\_clone) | The target VM to clone. Cannot be used with 'src\_file' | <pre>object({<br/>    datastore\_id = string<br/>    node\_name    = optional(string)<br/>    tpl\_id       = number<br/>  })</pre> | `null` | $\color{red}{no}$ |
+| <a name="input_src_clone"></a> [src\_clone](#input\_src\_clone) | The target to clone as base for the VM. Cannot be used with 'src\_file' | <pre>object({<br/>    datastore\_id = string<br/>    node\_name    = optional(string)<br/>    tpl\_id       = number<br/>  })</pre> | `null` | $\color{red}{no}$ |
 | <a name="input_src_file"></a> [src\_file](#input\_src\_file) | The target ISO file to use as base for the VM. Cannot be used with 'src\_clone' | <pre>object({<br/>    datastore\_id = string<br/>    file\_name    = string<br/>  })</pre> | `null` | $\color{red}{no}$ |
 | <a name="input_vm_name"></a> [vm\_name](#input\_vm\_name) | The name of the VM. | `string` | `n/a` | $\color{green}{yes}$ |
 | <a name="input_vm_id"></a> [vm\_id](#input\_vm\_id) | The ID of the VM. | `number` | `null` | $\color{red}{no}$ |
