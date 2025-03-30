@@ -41,9 +41,9 @@ jobs:
         run: echo "${{ steps.tf_dirs.outputs.directories }}"
 
   terraform-fmt:
+    name: Update terraform format
     needs:
       - collect-inputs
-    name: Update terraform format
     runs-on: ubuntu-latest
     outputs:
       fmt_status: ${{ steps.fmt.outcome }}
@@ -83,9 +83,9 @@ jobs:
           branch: ${{ github.event.pull_request.head.ref }}
 
   terraform-docs:
+    name: Update terraform docs
     needs:
       - collect-inputs
-    name: Update terraform docs
     runs-on: ubuntu-latest
     outputs:
       docs_status: ${{ steps.docs.outcome }}
@@ -124,6 +124,7 @@ jobs:
           git-commit-message: '[Docs] Generate README.md (terraform-docs)'
 
   terraform-lint:
+    name: Run terraform lint validation
     needs:
       - terraform-fmt
       - terraform-docs
@@ -166,6 +167,7 @@ jobs:
           tflint_init: true
 
   terraform-security:
+    name: Run terraform security validation
     needs:
       - terraform-fmt
       - terraform-docs
@@ -205,12 +207,12 @@ jobs:
           trivy_version: ${{ env.trivy_version }}
 
   pre-commit:
+    name: Pre-Commit
     needs:
       - terraform-docs
       - terraform-fmt
       - terraform-lint
       - terraform-security
-    name: Pre-Commit
     runs-on: ubuntu-latest
     steps:
       - name: Delete huge unnecessary tools folder
