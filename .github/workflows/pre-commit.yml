@@ -9,53 +9,211 @@ on:
       - "stable-"
 
 env:
-  TERRAFORM_DOCS_VERSION: 0.19.0
-  TFLINT_VERSION: 0.53.0
-  HCLEDIT_VERSION: 0.2.3
+  COMMIT_USER: 'github-actions'
+  COMMIT_EMAIL: 'noreply@github.com'
+  OPENTOFU_VERSION: '1.9.0'
+  TERRAFORM_DOCS_VERSION: '0.19.0'
+  TFLINT_VERSION: 'latest'
+  TFLINT_REPO: 'ralzareck/tflint-config'
+  TFLINT_REPO_REF: 'main'
+  TFLINT_REPO_CONFIG_PATH: 'module'
+  TRIVY_VERSION: 'latest'
+  HCLEDIT_VERSION: '0.2.3'
 
 jobs:
   collect-inputs:
     name: Get Terraform directories
     runs-on: ubuntu-latest
     outputs:
-      directories: ${{ steps.tf-dirs.outputs.directories }}
+      directories: ${{ steps.tf_dirs.outputs.directories }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Get root directories
-        id: tf-dirs
-        uses: clowdhaus/terraform-composite-actions/directories@v1.9.0
-
-      - name: List terraform directories
-        run: echo "${{ steps.tf-dirs.outputs.directories }}"
-
-  update-docs:
-    needs: collect-inputs
-    name: Update terraform docs
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
         with:
           ref: ${{ github.event.pull_request.head.ref }}
           repository: ${{github.event.pull_request.head.repo.full_name}}
 
+      - name: Get root directories
+        id: tf_dirs
+        uses: clowdhaus/terraform-composite-actions/directories@v1.9.0
+
+      - name: List terraform directories
+        run: echo "${{ steps.tf_dirs.outputs.directories }}"
+
+  terraform-fmt:
+    name: Update terraform format
+    needs:
+      - collect-inputs
+    runs-on: ubuntu-latest
+    outputs:
+      fmt_status: ${{ steps.fmt.outcome }}
+      diff_exists: ${{ steps.fmt_commit.outputs.diff }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{github.event.pull_request.head.repo.full_name}}
+
+      - name: Setup Terraform
+        uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: ${{ env.OPENTOFU_VERSION }}
+
+      - name: OpenTofu format
+        id: fmt
+        run: tofu fmt -recursive
+
+      - name: Commit Changes
+        id: fmt_commit
+        run: |
+          git config --local user.name "${{ env.COMMIT_USER }}"
+          git config --local user.email "${{ env.COMMIT_EMAIL }}"
+          if [[ -z $(git status -s) ]]; then
+            echo "diff=false" >> $GITHUB_OUTPUT
+          else
+            echo "diff=true" >> $GITHUB_OUTPUT
+          fi
+          git diff-index --quiet HEAD || git commit -m "[Style] Format code (opentofu fmt)" -a
+
+      - name: Push Changes
+        uses: ad-m/github-push-action@v0.8.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.event.pull_request.head.ref }}
+
+  terraform-docs:
+    name: Update terraform docs
+    needs:
+      - collect-inputs
+    runs-on: ubuntu-latest
+    outputs:
+      docs_status: ${{ steps.docs.outcome }}
+      diff_exists: ${{ steps.docs.outputs.num_changed > 0 }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{github.event.pull_request.head.repo.full_name}}
+
+      - name: Check For Submodules
+        id: check_submodules
+        run: |
+          if [[ -d "./modules" ]]; then
+              echo "dir_exists=true" >> $GITHUB_OUTPUT
+          else
+              echo "dir_exists=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Render terraform docs inside the README.md and push changes back to PR branch
+        id: docs
         uses: terraform-docs/gh-actions@v1.3.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           working-dir: .
+          recursive: ${{ steps.check_submodules.outputs.dir_exists }}
+          recursive-path: modules
           config-file: '.terraform-docs.yaml'
           output-file: 'README.md'
           output-method: 'inject'
           git-push: 'true'
-          git-commit-message: '[Docs] Generate README.md'
+          git-push-user-name: ${{ env.COMMIT_USER }}
+          git-push-user-email: ${{ env.COMMIT_EMAIL }}
+          git-commit-message: '[Docs] Generate README.md (terraform-docs)'
+
+  terraform-lint:
+    name: Run terraform lint validation
+    needs:
+      - terraform-fmt
+      - terraform-docs
+    runs-on: ubuntu-latest
+    outputs:
+      lint_status: ${{ steps.lint.outcome }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{github.event.pull_request.head.repo.full_name}}
+
+      - uses: terraform-linters/setup-tflint@v4
+        name: Setup TFLint
+        with:
+          tflint_version: ${{ env.TFLINT_VERSION }}
+
+      - name: Get TFLint Config
+        uses: terraform-linters/tflint-load-config-action@v2
+        if: ${{ env.TFLINT_REPO_CONFIG_PATH != '' }}
+        with:
+          source-repo: ${{ env.TFLINT_REPO }}
+          source-path: ${{ env.TFLINT_REPO_CONFIG_PATH }}/.tflint.hcl
+          source-ref: ${{ env.TFLINT_REPO_REF }}
+          destination-path: .tflint.hcl
+
+      - name: Run TFLint
+        uses: reviewdog/action-tflint@v1
+        id: lint
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          reporter: github-pr-check
+          fail_level: error
+          filter_mode: nofilter
+          level: error
+          flags: ''
+          tflint_version: ${{ env.TFLINT_VERSION }}
+          tflint_config: .tflint.hcl
+          tflint_init: true
+
+  terraform-security:
+    name: Run terraform security validation
+    needs:
+      - terraform-fmt
+      - terraform-docs
+      - terraform-lint
+    runs-on: ubuntu-latest
+    outputs:
+      security_status: ${{ steps.security.outcome }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{github.event.pull_request.head.repo.full_name}}
+
+      - name: Check For Examples
+        run: |
+          if [[ ! -d "./examples" ]]; then
+            echo "could not find required examples path 'examples' for terratest"
+            exit 1
+          fi
+
+      - name: Run Trify
+        uses: reviewdog/action-trivy@v1
+        id: security
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          working_directory: examples
+          reporter: github-pr-check
+          fail_level: error
+          filter_mode: nofilter
+          level: error
+          flags: ''
+          trivy_version: ${{ env.TRIVY_VERSION }}
+          trivy_flags: ''
+          trivy_command: config
+          trivy_target: '.'
 
   pre-commit:
-    needs: update-docs
     name: Pre-Commit
+    needs:
+      - terraform-docs
+      - terraform-fmt
+      - terraform-lint
+      - terraform-security
     runs-on: ubuntu-latest
     steps:
       - name: Delete huge unnecessary tools folder
@@ -81,7 +239,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           terraform-version: ${{ steps.tf-versions.outputs.maxVersion }}
-          tflint-version: v${{ env.TFLINT_VERSION }}
+          tflint-version: ${{ env.TFLINT_VERSION }}
           terraform-docs-version: v${{ env.TERRAFORM_DOCS_VERSION }}
           install-hcledit: true
           hcledit-version: ${{ env.HCLEDIT_VERSION }}
