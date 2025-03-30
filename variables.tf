@@ -28,7 +28,7 @@ variable "src_clone" {
     node_name    = optional(string)
     tpl_id       = number
   })
-  description  = "The target to clone as base for the VM. Cannot be used with 'src_file'"
+  description = "The target to clone as base for the VM. Cannot be used with 'src_file'"
   nullable    = true
   default     = null
 }
