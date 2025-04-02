@@ -170,7 +170,7 @@ resource "proxmox_virtual_environment_vm" "pve_vm" {
 
     precondition {
       condition     = var.vm_bios == "ovmf" ? var.vm_efi_disk != null : true
-      error_message = "Variable 'srcvm_efi_disk_file' is required when using the VM bios type is 'ovmf'"
+      error_message = "Variable 'vm_efi_disk' is required when using the VM bios type is 'ovmf'"
     }
 
     precondition {

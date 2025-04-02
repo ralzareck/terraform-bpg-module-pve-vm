@@ -22,6 +22,14 @@ module "pve_vm" {
     datastore_id = "data"
   }
 
+  vm_disk = {
+    scsi0 = {
+      datastore_id = "data"
+      size         = 8
+      main_disk    = true
+    }
+  }
+
   vm_net_ifaces = {
     net0 = {
       bridge    = "vmbr0"

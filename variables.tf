@@ -210,7 +210,6 @@ variable "vm_disk" {
     main_disk    = optional(bool, false)
   }))
   description = "VM Disks configuration. Use the 'main_disk' value to tag a disk as main to host the VM image. Only usefull with creation type 'image'."
-  default     = {}
 
   validation {
     condition     = alltrue([for k, v in var.vm_disk : can(regex("(?:scsi|sata|virtio)\\d+", k))])
