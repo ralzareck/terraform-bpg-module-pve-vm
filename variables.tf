@@ -55,12 +55,14 @@ variable "vm_name" {
 variable "vm_id" {
   type        = number
   description = "The ID of the VM."
+  nullable    = true
   default     = null
 }
 
 variable "vm_description" {
   type        = string
   description = "The description of the VM."
+  nullable    = true
   default     = null
 }
 
