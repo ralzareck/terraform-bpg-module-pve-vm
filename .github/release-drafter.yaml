@@ -23,9 +23,11 @@ categories:
       - 'documentation'
   - title: '🛠️ Maintenance'
     labels:
-      - 'ci'
       - 'chore'
       - 'style'
+
+exclude-labels:
+  - 'ci'
 
 version-resolver:
   major:
