@@ -173,7 +173,6 @@ jobs:
     needs:
       - terraform-fmt
       - terraform-docs
-      - terraform-lint
     runs-on: ubuntu-latest
     outputs:
       security_status: ${{ steps.security.outcome }}
