@@ -1,5 +1,5 @@
 ---
-name: Pre-Commit and Generate terraform docs
+name: Validate Terraform files
 
 on:
   pull_request:
