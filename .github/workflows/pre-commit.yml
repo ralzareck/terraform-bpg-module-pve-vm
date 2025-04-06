@@ -148,6 +148,7 @@ jobs:
         uses: terraform-linters/tflint-load-config-action@v2
         if: ${{ env.TFLINT_REPO_CONFIG_PATH != '' }}
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           source-repo: ${{ env.TFLINT_REPO }}
           source-path: ${{ env.TFLINT_REPO_CONFIG_PATH }}/.tflint.hcl
           source-ref: ${{ env.TFLINT_REPO_REF }}
