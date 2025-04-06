@@ -1,5 +1,5 @@
 ---
-name: Pre-Commit and Generate terraform docs
+name: Validate Terraform files
 
 on:
   pull_request:
@@ -148,6 +148,7 @@ jobs:
         uses: terraform-linters/tflint-load-config-action@v2
         if: ${{ env.TFLINT_REPO_CONFIG_PATH != '' }}
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           source-repo: ${{ env.TFLINT_REPO }}
           source-path: ${{ env.TFLINT_REPO_CONFIG_PATH }}/.tflint.hcl
           source-ref: ${{ env.TFLINT_REPO_REF }}
@@ -172,7 +173,6 @@ jobs:
     needs:
       - terraform-fmt
       - terraform-docs
-      - terraform-lint
     runs-on: ubuntu-latest
     outputs:
       security_status: ${{ steps.security.outcome }}
