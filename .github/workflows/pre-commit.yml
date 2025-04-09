@@ -115,7 +115,7 @@ jobs:
           working-dir: .
           recursive: ${{ steps.check_submodules.outputs.dir_exists }}
           recursive-path: modules
-          config-file: '.terraform-docs.yaml'
+          config-file: '.github/terraform-docs.yaml'
           output-file: 'README.md'
           output-method: 'inject'
           git-push: 'true'
